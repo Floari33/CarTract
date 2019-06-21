@@ -12,13 +12,14 @@ contract CarTract{
         string[] comments;
         bool verkaufBereit;
         uint256 preis;
+        address [] ServiceCompanies;
     }
      address payable[]  AngebotsAddressen;
      uint256[] Angebote;
      mapping (address=>uint256) getBackValue;
      mapping (uint256=>Machine) aMachine;
      Machine thisMachine;
-     bool alreadysetted = false;
+     bool alreadysetted= false; 
     constructor(uint256 _fahrzeugnummer) payable public{
         require(_fahrzeugnummer>0,"Bitte Fahrzeugnummer angeben");
         thisMachine = aMachine[_fahrzeugnummer];
@@ -67,10 +68,13 @@ contract CarTract{
          thisMachine.verkaufBereit = false;
     }
     function setNewComment(string memory entry) public{
+        thisMachine.ServiceCompanies.push(msg.sender);
         thisMachine.comments.push(entry);
     }
+    
     function setNewComment(uint256 _kilometer, string memory _entry) public {
         thisMachine.kilometer = _kilometer;
+        thisMachine.ServiceCompanies.push(msg.sender);
         thisMachine.comments.push(_entry);
     }
     function getMachine() public view returns (address besitzer,uint256 kilometer,string[] memory comments,bool verkaufBereit,uint256 preis){
@@ -79,7 +83,7 @@ contract CarTract{
     function getOwner() public view returns (address){
         return thisMachine.besitzer;
     }
-    function getAllComments() public view returns (string memory){
+    function getAllComments() public view returns (string memory, address[] memory){
         string memory entries;
         entries = string(abi.encodePacked('{"Aufenthalte": ['));
         uint i = 0;
@@ -93,7 +97,7 @@ contract CarTract{
         i = i+1;
     }
      entries = string(abi.encodePacked(entries,'] }'));
-    return entries;
+    return (entries,thisMachine.ServiceCompanies);
     }
     function getPrice() public view returns(uint256){
         return thisMachine.preis / 1000000000000000000 ;
